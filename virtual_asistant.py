@@ -1,11 +1,15 @@
 import pyttsx3
 import speech_recognition as sr
-#import pywhatkit
-#import yfinance as yf
-#import pyjokes
-#import webbrowser
-#import datetime
-#import wikipedia
+import pywhatkit
+import yfinance as yf
+import pyjokes
+import webbrowser
+import datetime
+import wikipedia
+
+# voice options / language
+id1 = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-GB_HAZEL_11.0'
+id2 = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0'
 
 # listen to our microphone and return the audio as text
 def transform_audio_to_text():
@@ -26,8 +30,27 @@ def speak(message):
     engine.runAndWait()
     engine.setProperty('voice', id2)
 
-# voice options / language
-id1 = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-GB_HAZEL_11.0'
-id2 = 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0'
+# notify day of week
+def ask_day():
 
-speak('Hello Gabriel I hope you will have a great day')
+    # create variable whit today dates
+    day = datetime.date.today()
+    print(day)
+
+    # create variable for the day of week
+    day_week = day.weekday()
+    print(day_week)
+
+    # dictionary of day names
+    calendar = {0: 'Monday',
+                  1: 'Tuesday',
+                  2: 'Wednesday',
+                  3: 'Thursday',
+                  4: 'Friday',
+                  5: 'Saturday',
+                  6: 'Sunday'}
+
+    # say the day of the week
+    speak(f'Today is {calendar[day_week]}')
+ask_day()
+#speak('Hello Gabriel I hope you will have a great day')
