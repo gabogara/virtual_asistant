@@ -17,8 +17,6 @@ def transform_audio_to_text():
     r = sr.Recognizer()
     # microphone configuration
 
-
-
 # function so that the assistant can be heard
 def speak(message):
 
@@ -52,5 +50,32 @@ def ask_day():
 
     # say the day of the week
     speak(f'Today is {calendar[day_week]}')
-ask_day()
-#speak('Hello Gabriel I hope you will have a great day')
+
+# informar que hora es
+def ask_hour():
+
+    # create a variable whit hour's date
+    hourx = datetime.datetime.now()
+    hourx = f'In this moment it is {hourx.hour} whit {hourx.minute} minutes and {hourx.second} seconds'
+    print(hourx)
+
+    # say hour
+    speak(hourx)
+
+# function initial greeting
+def inicial_greeting():
+
+    # create variable with time data
+    hourz = datetime.datetime.now()
+    if hourz.hour < 6 or hourz.hour > 20:
+        time = 'Good evening'
+    elif 6 <= hourz.hour < 13:
+        time = 'Good morning'
+    else:
+        time = 'Good afternoon'
+
+    # say hello
+    speak(f'{time}, I am Helena, your personal assistant. Please tell me how I can help you')
+
+inicial_greeting()
+#ask_hour()
