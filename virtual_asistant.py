@@ -185,21 +185,6 @@ def ask_things():
         elif 'joke' in order1:
             speak(pyjokes.get_joke('en'))
             continue
-        elif 'stock price' in order1:
-            stok_shares = order1.replace('stock price', '').strip()
-            pocket = {'apple': 'AAPL',
-                      'amazon': 'AMZN',
-                      'google': 'GOOGL'}
-            try:
-                share_searched = pocket[stok_shares.lower()]
-                share_searched = yf.Ticker(share_searched)
-                current_price = share_searched.info['regularMarketPrice']
-                speak(f'I found, the price of {stok_shares} is {current_price}')
-            except KeyError:
-                speak("Sorry, but I couldn't find that stock.")
-            except Exception as e:
-                speak(f"Sorry, but I could not find the stock price. Error: {e}")
-                continue
         elif 'bye' in order1:
             speak('I am going to rest, let me know if you need anything.')
             break
