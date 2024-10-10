@@ -1,7 +1,6 @@
 import pyttsx3
 import speech_recognition as sr
 import pywhatkit
-import yfinance as yf
 import pyjokes
 import webbrowser
 import datetime
@@ -70,7 +69,7 @@ def transform_audio_to_text():
 def speak(message):
     # start the engine of pyttsx3
     engine = pyttsx3.init()
-    engine.setProperty('voice', id2)  # Mueve esta línea aquí
+    engine.setProperty('voice', id2)
     # deliver message
     engine.say(message)
     engine.runAndWait()
@@ -188,6 +187,5 @@ def ask_things():
         elif 'bye' in order1:
             speak('I am going to rest, let me know if you need anything.')
             break
-
 
 ask_things()
