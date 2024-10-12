@@ -6,17 +6,28 @@ import webbrowser
 import datetime
 import wikipedia
 
-# voice options / language
+# Voice options / language
 id1 = r'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-GB_HAZEL_11.0'
 id2 = r'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0'
 
-# listen to our microphone and return the audio as text
+# Initialize the engine globally
+engine = pyttsx3.init()
+engine.setProperty('voice', id2)
+
+
+# Function to speak messages
+def speak(message):
+    engine.say(message)
+    engine.runAndWait()
+
+
+# Listen to the microphone and return the audio as text
 def transform_audio_to_text():
     r = sr.Recognizer()
     r.energy_threshold = 300  # Adjust to suit your environment
     with sr.Microphone() as source1:
         r.pause_threshold = 0.8
-        print("you can speak")
+        print("You can speak")
         audio = r.listen(source1)
 
         try:
@@ -33,32 +44,26 @@ def transform_audio_to_text():
             speak(f"An unexpected error occurred: {str(e)}")
             return None
 
-# function so that the assistant can be heard
-# Initialize the engine globally
-engine = pyttsx3.init()
-engine.setProperty('voice', id2)
 
-def speak(message):
-    engine.say(message)
-    engine.runAndWait()
+# Function to get current date and time
+def get_current_datetime():
+    return datetime.datetime.now()
+
 
 # Inform day of week
-def get_current_datetime():
-    now = datetime.datetime.now()
-    return now
-
 def ask_day():
     today = get_current_datetime().strftime('%A')
     speak(f'Today is {today}')
 
+
+# Inform current time
 def ask_hour():
     now = get_current_datetime()
     speak(f'In this moment it is {now.hour} with {now.minute} minutes and {now.second} seconds')
 
-# function initial greeting
-def inicial_greeting():
 
-    # create variable with time data
+# Initial greeting
+def inicial_greeting():
     hourz = datetime.datetime.now()
     if hourz.hour < 6 or hourz.hour > 20:
         time = 'Good evening'
@@ -67,28 +72,22 @@ def inicial_greeting():
     else:
         time = 'Good afternoon'
 
-    # say hello
-    speak(f'{time}, I am Helena, your personal assistant. Please tell me how I can help you')
+    speak(f'{time}, I am Helena, your personal assistant. Please tell me how I can help you.')
 
+
+# Central function of the assistant
 def ask_things():
-    # Activar saludo inicial
     inicial_greeting()
 
-    # Variable de corte
-    begining = True
-
-    # Bucle central
-    while begining:
-        # Activar el micrófono y guardar la orden en una cadena
+    while True:
         order1 = transform_audio_to_text()
 
-        # Verificar si se recibió una orden válida
-        if order1:
-            order1 = order1.lower()
-        else:
-            continue  # Volver al inicio del bucle si no se recibió una orden válida
+        # Check if order1 is None before calling lower()
+        if order1 is None:
+            continue
 
-        # Procesar las órdenes recibidas
+        order1 = order1.lower()
+
         if 'open youtube' in order1:
             speak('With pleasure, I am opening YouTube')
             webbrowser.open('https://www.youtube.com')
@@ -116,7 +115,7 @@ def ask_things():
                 result = wikipedia.summary(search_term, sentences=1)
                 speak(f"Wikipedia says: {result}")
             except wikipedia.exceptions.DisambiguationError as e:
-                options = e.options[:3]  # Limitar opciones a 3
+                options = e.options[:3]  # Limit options to 3
                 speak(f"There are multiple results. Please specify one: {', '.join(options)}")
             except wikipedia.exceptions.PageError:
                 speak("No results found.")
@@ -137,4 +136,6 @@ def ask_things():
         elif 'bye' in order1:
             speak('I am going to rest, let me know if you need anything.')
             break
+
+
 ask_things()
