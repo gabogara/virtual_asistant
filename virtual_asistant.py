@@ -12,101 +12,48 @@ id2 = r'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_
 
 # listen to our microphone and return the audio as text
 def transform_audio_to_text():
-
-    # store recognizer in variable
     r = sr.Recognizer()
-
-    # configure the microphone
+    r.energy_threshold = 300  # Adjust to suit your environment
     with sr.Microphone() as source1:
-
-        # Hold on
         r.pause_threshold = 0.8
-
-        # to inform that the recording has started
         print("you can speak")
-
-        # save what you hear as audio
         audio = r.listen(source1)
 
         try:
-            # search on Google
             order = r.recognize_google(audio, language="en")
-
-            # proof that he was able to enter
-            print("You said: " + order)
-
-            # response order
+            print(f"You said: {order}")
             return order
-
-        # in case you do not understand the audio
         except sr.UnknownValueError:
-
-            # proof that you did not understand the audio
-            print("ups, I dont get you")
-
-            # return error
-            return "I am still waiting"
-
-        # in case of failure to resolve the order
+            speak("Sorry, I didn't catch that. Please speak again.")
+            return None
         except sr.RequestError:
-
-            # proof that it did not understand the audio
-            print("ups, no service")
-
-            # return error
-            return "I am still waiting"
-
-        # error unexpected
-        except:
-
-            # proof that it did not understand the audio
-            print("ups, something is wrong")
-
-            # return error
-            return "I am still waiting"
+            speak("Network issue. Please check your connection.")
+            return None
+        except Exception as e:
+            speak(f"An unexpected error occurred: {str(e)}")
+            return None
 
 # function so that the assistant can be heard
+# Initialize the engine globally
+engine = pyttsx3.init()
+engine.setProperty('voice', id2)
+
 def speak(message):
-    # start the engine of pyttsx3
-    engine = pyttsx3.init()
-    engine.setProperty('voice', id2)
-    # deliver message
     engine.say(message)
     engine.runAndWait()
 
 # Inform day of week
+def get_current_datetime():
+    now = datetime.datetime.now()
+    return now
+
 def ask_day():
+    today = get_current_datetime().strftime('%A')
+    speak(f'Today is {today}')
 
-    # create variable whit today dates
-    day = datetime.date.today()
-    print(day)
-
-    # create variable for the day of week
-    day_week = day.weekday()
-    print(day_week)
-
-    # dictionary of day names
-    calendar = {0: 'Monday',
-                  1: 'Tuesday',
-                  2: 'Wednesday',
-                  3: 'Thursday',
-                  4: 'Friday',
-                  5: 'Saturday',
-                  6: 'Sunday'}
-
-    # say the day of the week
-    speak(f'Today is {calendar[day_week]}')
-
-# inform what time it is
 def ask_hour():
-
-    # create a variable whit hour's date
-    hourx = datetime.datetime.now()
-    hourx = f'In this moment it is {hourx.hour} whit {hourx.minute} minutes and {hourx.second} seconds'
-    print(hourx)
-
-    # say hour
-    speak(hourx)
+    now = get_current_datetime()
+    speak(f'In this moment it is {now.hour} with {now.minute} minutes and {now.second} seconds')
 
 # function initial greeting
 def inicial_greeting():
@@ -123,19 +70,25 @@ def inicial_greeting():
     # say hello
     speak(f'{time}, I am Helena, your personal assistant. Please tell me how I can help you')
 
-# central function of the assistant
 def ask_things():
-    # activate initial greeting
+    # Activar saludo inicial
     inicial_greeting()
 
-    # cut-off variable
+    # Variable de corte
     begining = True
 
-    # central loop
+    # Bucle central
     while begining:
-        # activate the microphone and save the order in a string
-        order1 = transform_audio_to_text().lower()
+        # Activar el micrófono y guardar la orden en una cadena
+        order1 = transform_audio_to_text()
 
+        # Verificar si se recibió una orden válida
+        if order1:
+            order1 = order1.lower()
+        else:
+            continue  # Volver al inicio del bucle si no se recibió una orden válida
+
+        # Procesar las órdenes recibidas
         if 'open youtube' in order1:
             speak('With pleasure, I am opening YouTube')
             webbrowser.open('https://www.youtube.com')
@@ -154,7 +107,6 @@ def ask_things():
             speak('Looking it up on Wikipedia')
             search_term = order1.replace('search in wikipedia', '').strip()
 
-            # Check if search_term is empty
             if not search_term:
                 speak("Please provide a term to search on Wikipedia.")
                 continue
@@ -162,23 +114,21 @@ def ask_things():
             wikipedia.set_lang('en')
             try:
                 result = wikipedia.summary(search_term, sentences=1)
-                speak('Wikipedia says the following:')
-                speak(result)
+                speak(f"Wikipedia says: {result}")
             except wikipedia.exceptions.DisambiguationError as e:
-                speak("There are multiple results for that. Please be more specific.")
+                options = e.options[:3]  # Limitar opciones a 3
+                speak(f"There are multiple results. Please specify one: {', '.join(options)}")
             except wikipedia.exceptions.PageError:
-                speak("Sorry, I couldn't find any page matching that term.")
-            except Exception as e:
-                speak(f"An error occurred while searching Wikipedia: {e}")
+                speak("No results found.")
             continue
         elif 'search on the internet' in order1:
             speak('I am working on it right now')
-            order = order1.replace('search on the internet', '')
+            order1 = order1.replace('search on the internet', '')
             pywhatkit.search(order1)
             speak('This is what I have found')
             continue
         elif 'reproduce' in order1:
-            speak('good idea, I am starting to reproduce it')
+            speak('Good idea, I am starting to reproduce it')
             pywhatkit.playonyt(order1)
             continue
         elif 'joke' in order1:
@@ -187,5 +137,4 @@ def ask_things():
         elif 'bye' in order1:
             speak('I am going to rest, let me know if you need anything.')
             break
-
 ask_things()
